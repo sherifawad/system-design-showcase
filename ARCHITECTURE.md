@@ -2,37 +2,43 @@
 
 ## System Overview
 
-This document presents the high-level architecture for a system comprising a Next.js frontend integrated with a .NET OData backend. The interaction between these two components is designed to provide a responsive and efficient user experience while maintaining robust backend processing.
+This showcase demonstrates a comprehensive Multi-Tenant Enterprise HR Solution designed to bridge the gap between a centralized mobile interface and decentralized on-premises deployments for multiple tenants.
 
-### System Overview Diagram
+The architecture comprises three main pillars:
+1.  **Proxy Service (Next.js)**: A high-availability dynamic router and security enforcer.
+2.  **HR Solution Backend (.NET)**: A Clean Architecture-based monolith for HR operations.
+3.  **HR Solution Frontend (Next.js)**: A feature-rich employee portal.
 
-![System Overview](link_to_system_overview_diagram)
+### Multi-Tenant On-Premises Architecture
+
+The system solves the challenge of having a single mobile application that needs to connect to various on-premises tenant servers. Each tenant hosts their own instance of the HR Solution (.NET + SQL Server), ensuring data sovereignty and meeting strict enterprise security requirements.
+
+```mermaid
+graph TD
+    A[Mobile Application] -->|1. Auth & Discovery| B[Proxy Service]
+    B -->|2. Get Tenant URL| C[(Central Tenant DB)]
+    B -->|3. Route Request| D[Tenant A On-Prem Server]
+    B -->|3. Route Request| E[Tenant B On-Prem Server]
+    D -->|SQL| F[(Tenant A DB)]
+    E -->|SQL| G[(Tenant B DB)]
+```
 
 ## Key Design Decisions
 
-1. **Frontend Framework**: Next.js was chosen for its flexibility, server-side rendering capabilities, and ease of maintaining large-scale applications.
-2. **Backend Technology**: .NET OData provides a standardized protocol for data access, allowing seamless integration and efficient querying from the frontend.
-3. **State Management**: Considering the application's size, a state management system like Redux or React Context API will be utilized.
-4. **Deployment Strategy**: Utilize platforms like Vercel for the Next.js application and Azure for the .NET backend to enhance performance and scalability.
+1.  **Dynamic Routing & Multi-Tenancy**: The Proxy Service acts as the single point of entry for the mobile app, dynamically resolving tenant server URLs based on login credentials and company identifiers.
+2.  **Clean Architecture (Backend)**: The .NET HR backend follows Clean Architecture principles to ensure separation of concerns, testability, and independence from external frameworks.
+3.  **Next.js for Proxy and Frontend**: Chosen for its robust server-side capabilities, performance optimizations, and developer experience.
+4.  **Security Enforcement (Proxy)**: The Proxy Service performs real-time checks for mobile app versioning, OS versioning, and device security (e.g., root detection) before allowing traffic to hit the tenant servers.
+5.  **SQL Server**: Used as the primary relational database for both the central tenant management and individual tenant HR data.
 
-## Data Flow Examples
+## Deployment Strategy
 
-- **User Authentication**: 
-  - The frontend captures user credentials and sends them to the backend via an OData endpoint. Upon validation, a JWT is returned to the frontend.
+*   **Hybrid Cloud/On-Prem**: The Proxy Service is typically hosted in a central cloud environment (e.g., Azure/AWS) to ensure global accessibility for the mobile app, while the HR Solution instances are deployed within each tenant's private infrastructure (on-premises).
 
-- **Data Retrieval**: 
-  - The frontend makes GET requests to the OData API to fetch necessary data, which is then rendered dynamically on the user interface.
+## Security & Compliance
 
-## Security Considerations
-
-- **Authentication**: Implement JWT for secure user authentication.
-- **Authorization**: Role-based access control will be enforced at the OData layer.
-- **Data Protection**: Utilize HTTPS for all communications to protect data in transit.
-
-## Performance Optimizations
-
-- **Server-Side Rendering**: Leverage Next.js server-side rendering to reduce time-to-first-byte (TTFB).
-- **Caching strategies**: Implement caching both on the client-side and server-side, using strategies like stale-while-revalidate for improved performance.
-- **Database Optimization**: Use efficient indexing strategies and optimize OData queries to minimize load on the backend.
+*   **JWT Authentication**: Secure stateless authentication across all services.
+*   **Root Detection & Device Analysis**: Proactive security measures in the Proxy layer to prevent unauthorized or compromised access.
+*   **Data Isolation**: Physical data isolation by deploying separate databases for each tenant.
 
 ---
