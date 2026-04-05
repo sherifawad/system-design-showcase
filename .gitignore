@@ -1,0 +1,14 @@
+# Node.js
+node_modules/
+npm-debug.log
+package-lock.json
+
+# TypeScript
+*.tsbuildinfo
+
+# Next.js
+.next/
+out/
+
+# VSCode
+.vscode/
